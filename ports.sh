@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Copyright (C) 2015 Kurt Kanzenbach <kurt@kmk-computers.de>
-# Time-stamp: <2015-09-03 14:25:55 kurt>
+# Time-stamp: <2015-09-03 14:35:56 kurt>
 #
 # Shell Script for updating the FreeBSD ports using portmaster.
 #
@@ -32,19 +32,23 @@
 
 set -e
 
+MAILTO=root
+
 PKG=/usr/sbin/pkg
 MAKE=/usr/bin/make
 PORTMASTER=/usr/local/sbin/portmaster
 YES=/usr/bin/yes
+MAIL=/usr/bin/mail
 
 usage()
 {
   cat <<EOF
-ports.sh [-h|--help] [command(s)]
+$0 [-h|--help] [command(s)]
   - commands
     - update : Update the ports tree
     - list   : Show ports to be updated
     - upgrade: Run portmaster to upgrade ports
+    - cron   : Updates ports tree and sends a mail with a list of outdated ports
     - --help : Show this help text
 EOF
 }
@@ -55,6 +59,7 @@ test_tools()
   [ -x "$MAKE" ]       || (echo "make not found"       ; exit -1)
   [ -x "$PORTMASTER" ] || (echo "portmaster not found" ; exit -1)
   [ -x "$YES" ]        || (echo "yes not found"        ; exit -1)
+  [ -x "$MAIL" ]       || (echo "mail not found"       ; exit -1)
 }
 
 update_tree()
@@ -81,11 +86,28 @@ update_ports()
   done
 }
 
+cron()
+{
+  cd /usr/ports
+  "$MAKE" update >/dev/null
+  PORTS=`"$PKG" version -vl\<`
+  [ "$PORTS" == "" ] && return
+  (
+    echo "Hello"
+    echo ""
+    echo "List of ports to be updated:"
+    echo "$PORTS"
+    echo ""
+    echo "Cheers, $0"
+  ) | mail -s "Updateable Ports on Host `hostname`" "$MAILTO"
+}
+
 while [ $# -gt 0 ] ; do
   case "$1" in
     update   ) update_tree  ; shift ;;
     list     ) list_updates ; shift ;;
     upgrade  ) update_ports ; shift ;;
+    cron     ) cron ; break ;;
     -h|--help) usage ; shift ;;
     *        ) update_tree ; list_updates ; update_ports ; break ;;
   esac
