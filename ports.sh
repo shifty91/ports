@@ -1,10 +1,9 @@
 #!/bin/sh
 #
 # Copyright (C) 2015 Kurt Kanzenbach <kurt@kmk-computers.de>
-# Time-stamp: <2015-08-31 12:13:04 kurt>
+# Time-stamp: <2015-09-03 09:07:19 kurt>
 #
-# Shell Script for updating the FreeBSD ports tree.
-# It uses portmaster for that.
+# Shell Script for updating the FreeBSD ports using portmaster.
 #
 
 set -e
@@ -13,6 +12,18 @@ PKG=/usr/sbin/pkg
 MAKE=/usr/bin/make
 PORTMASTER=/usr/local/sbin/portmaster
 YES=/usr/bin/yes
+
+usage()
+{
+  cat <<EOF
+ports.sh [-h|--help] [command(s)]
+  - commands
+    - update : Update the ports tree
+    - list   : Show ports to be updated
+    - upgrade: Run portmaster to upgrade ports
+    - --help : Show this help text
+EOF
+}
 
 test_tools()
 {
@@ -24,25 +35,36 @@ test_tools()
 
 update_tree()
 {
+  echo -n "Updating ports tree..."
   cd /usr/ports
-  "$MAKE" update
+  "$MAKE" update >/dev/null
+  echo "Done"
 }
 
 list_updates()
 {
+  echo "Ports to be updated:"
   "$PKG" version -vl\<
 }
 
 update_ports()
 {
-  "$YES" | "$PORTMASTER" -adB
+  while read -p "Run portmaster (y/n)? " ANSWER ; do
+    case "$ANSWER" in
+      y*) "$YES" | "$PORTMASTER" -adB ; break ;;
+      n*) break ;;
+    esac
+  done
 }
 
-case "$1" in
-  update  ) update_tree  ;;
-  list    ) list_updates ;;
-  upgrade ) update_ports ;;
-  *       ) update_tree ; list_updates ; update_ports ;;
-esac
+while [ $# -gt 0 ] ; do
+  case "$1" in
+    update   ) update_tree  ; shift ;;
+    list     ) list_updates ; shift ;;
+    upgrade  ) update_ports ; shift ;;
+    -h|--help) usage ; shift ;;
+    *        ) update_tree ; list_updates ; update_ports ; break ;;
+  esac
+done
 
 exit 0
