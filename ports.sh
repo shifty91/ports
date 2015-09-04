@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Copyright (C) 2015 Kurt Kanzenbach <kurt@kmk-computers.de>
-# Time-stamp: <2015-09-03 14:35:56 kurt>
+# Time-stamp: <2015-09-04 09:11:47 kurt>
 #
 # Shell Script for updating the FreeBSD ports using portmaster.
 #
@@ -33,6 +33,7 @@
 set -e
 
 MAILTO=root
+PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
 PKG=/usr/sbin/pkg
 MAKE=/usr/bin/make
@@ -93,14 +94,16 @@ cron()
   PORTS=`"$PKG" version -vl\<`
   [ "$PORTS" == "" ] && return
   (
-    echo "Hello"
+    echo "Hello,"
     echo ""
     echo "List of ports to be updated:"
     echo "$PORTS"
     echo ""
     echo "Cheers, $0"
-  ) | mail -s "Updateable Ports on Host `hostname`" "$MAILTO"
+  ) | "$MAIL" -s "Updateable Ports on Host `hostname`" "$MAILTO"
 }
+
+test_tools
 
 while [ $# -gt 0 ] ; do
   case "$1" in
