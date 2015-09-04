@@ -1,11 +1,10 @@
 #!/bin/sh
 #
-# Copyright (C) 2015 Kurt Kanzenbach <kurt@kmk-computers.de>
-# Time-stamp: <2015-09-04 09:11:47 kurt>
+# Time-stamp: <2015-09-04 17:24:53 kurt>
 #
 # Shell Script for updating the FreeBSD ports using portmaster.
 #
-# Copyright (c) 2015, Kurt Kanzenbach
+# Copyright (c) 2015, Kurt Kanzenbach <kurt@kmk-computers.de>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +32,7 @@
 set -e
 
 MAILTO=root
-PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 PKG=/usr/sbin/pkg
 MAKE=/usr/bin/make
@@ -90,7 +89,20 @@ update_ports()
 cron()
 {
   cd /usr/ports
-  "$MAKE" update >/dev/null
+  # update ports depending on method
+  PORTSNAP=`which portsnap`
+  SVN=`which svn`
+  GIT=`which git`
+  if [ -f ".portsnap.INDEX" ] ; then
+    [ -x "$PORTSNAP" ] && "$PORTSNAP" cron >/dev/null
+  elif [ -d ".svn" ] ; then
+    [ -x "$SVN" ] && "$SVN" update >/dev/null
+  elif [ -d ".git" ] ; then
+    [ -x "$GIT" ] && "$GIT" pull >/dev/null
+  else
+    echo "Could not update ports tree. Exiting now."
+    exit -1
+  fi
   PORTS=`"$PKG" version -vl\<`
   [ "$PORTS" == "" ] && return
   (
