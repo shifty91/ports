@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Time-stamp: <2015-09-04 17:24:53 kurt>
+# Time-stamp: <2015-10-24 12:38:31 kurt>
 #
 # Shell Script for updating the FreeBSD ports using portmaster.
 #
@@ -117,15 +117,23 @@ cron()
 
 test_tools
 
-while [ $# -gt 0 ] ; do
-  case "$1" in
-    update   ) update_tree  ; shift ;;
-    list     ) list_updates ; shift ;;
-    upgrade  ) update_ports ; shift ;;
-    cron     ) cron ; break ;;
-    -h|--help) usage ; shift ;;
-    *        ) update_tree ; list_updates ; update_ports ; break ;;
-  esac
-done
+if [ $# -eq 0 ] ; then
+  # nothing given -> do complete update
+  update_tree
+  list_updates
+  update_ports
+else
+  # arguments given
+  while [ $# -gt 0 ] ; do
+    case "$1" in
+      update   ) update_tree  ; shift ;;
+      list     ) list_updates ; shift ;;
+      upgrade  ) update_ports ; shift ;;
+      cron     ) cron ; break ;;
+      -h|--help) usage ; shift ;;
+      *        ) echo "Unknown option '$1'" ; exit -1 ;;
+    esac
+  done
+fi
 
 exit 0
