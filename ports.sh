@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Time-stamp: <2015-10-26 22:31:44 kurt>
+# Time-stamp: <2015-10-26 22:35:03 kurt>
 #
 # Shell Script for updating the FreeBSD ports using portmaster.
 #
@@ -55,11 +55,11 @@ EOF
 
 test_tools()
 {
-  [ -x "$PKG" ]        || (echo "pkg not found"        ; exit -1)
-  [ -x "$MAKE" ]       || (echo "make not found"       ; exit -1)
-  [ -x "$PORTMASTER" ] || (echo "portmaster not found" ; exit -1)
-  [ -x "$YES" ]        || (echo "yes not found"        ; exit -1)
-  [ -x "$MAIL" ]       || (echo "mail not found"       ; exit -1)
+  [ -x "$PKG" ]        || (echo "pkg not found"        ; exit 1)
+  [ -x "$MAKE" ]       || (echo "make not found"       ; exit 1)
+  [ -x "$PORTMASTER" ] || (echo "portmaster not found" ; exit 1)
+  [ -x "$YES" ]        || (echo "yes not found"        ; exit 1)
+  [ -x "$MAIL" ]       || (echo "mail not found"       ; exit 1)
 }
 
 update_tree()
@@ -78,10 +78,10 @@ list_updates()
 
 update_ports()
 {
-  PORTS="$PKG version -vl\<"
+  PORTS=`$PKG version -vl\<`
   if [ "$PORTS" == "" ] ; then
     echo "Nothing to update"
-    exit -1
+    exit 1
   fi
 
   while read -p "Run portmaster (y/n)? " ANSWER ; do
@@ -107,7 +107,7 @@ cron()
     [ -x "$GIT" ] && "$GIT" pull >/dev/null
   else
     echo "Could not update ports tree. Exiting now."
-    exit -1
+    exit 1
   fi
   PORTS=`"$PKG" version -vl\<`
   [ "$PORTS" == "" ] && return
@@ -137,7 +137,7 @@ else
       upgrade  ) update_ports ; shift ;;
       cron     ) cron ; break ;;
       -h|--help) usage ; shift ;;
-      *        ) echo "Unknown option '$1'" ; exit -1 ;;
+      *        ) echo "Unknown option '$1'" ; exit 1 ;;
     esac
   done
 fi
