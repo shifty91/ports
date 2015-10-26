@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Time-stamp: <2015-10-24 12:38:31 kurt>
+# Time-stamp: <2015-10-26 22:31:44 kurt>
 #
 # Shell Script for updating the FreeBSD ports using portmaster.
 #
@@ -78,6 +78,12 @@ list_updates()
 
 update_ports()
 {
+  PORTS="$PKG version -vl\<"
+  if [ "$PORTS" == "" ] ; then
+    echo "Nothing to update"
+    exit -1
+  fi
+
   while read -p "Run portmaster (y/n)? " ANSWER ; do
     case "$ANSWER" in
       y*) "$YES" | "$PORTMASTER" -adB ; break ;;
