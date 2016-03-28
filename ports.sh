@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Time-stamp: <2015-10-26 22:35:03 kurt>
+# Time-stamp: <2016-03-28 20:21:35 kurt>
 #
 # Shell Script for updating the FreeBSD ports using portmaster.
 #
@@ -55,11 +55,11 @@ EOF
 
 test_tools()
 {
-  [ -x "$PKG" ]        || (echo "pkg not found"        ; exit 1)
-  [ -x "$MAKE" ]       || (echo "make not found"       ; exit 1)
-  [ -x "$PORTMASTER" ] || (echo "portmaster not found" ; exit 1)
-  [ -x "$YES" ]        || (echo "yes not found"        ; exit 1)
-  [ -x "$MAIL" ]       || (echo "mail not found"       ; exit 1)
+  [ -x "$PKG" ]        || ( echo "pkg not found"        ; exit 1 )
+  [ -x "$MAKE" ]       || ( echo "make not found"       ; exit 1 )
+  [ -x "$PORTMASTER" ] || ( echo "portmaster not found" ; exit 1 )
+  [ -x "$YES" ]        || ( echo "yes not found"        ; exit 1 )
+  [ -x "$MAIL" ]       || ( echo "mail not found"       ; exit 1 )
 }
 
 update_tree()
@@ -78,7 +78,7 @@ list_updates()
 
 update_ports()
 {
-  PORTS=`$PKG version -vl\<`
+  local PORTS=`$PKG version -vl\<`
   if [ "$PORTS" == "" ] ; then
     echo "Nothing to update"
     exit 1
@@ -96,11 +96,11 @@ cron()
 {
   cd /usr/ports
   # update ports depending on method
-  PORTSNAP=`which portsnap`
-  SVN=`which svn`
-  GIT=`which git`
+  local PORTSNAP=`which portsnap`
+  local SVN=`which svn`
+  local GIT=`which git`
   if [ -f ".portsnap.INDEX" ] ; then
-    [ -x "$PORTSNAP" ] && "$PORTSNAP" cron >/dev/null
+    [ -x "$PORTSNAP" ] && "$PORTSNAP" cron update >/dev/null
   elif [ -d ".svn" ] ; then
     [ -x "$SVN" ] && "$SVN" update >/dev/null
   elif [ -d ".git" ] ; then
@@ -109,7 +109,7 @@ cron()
     echo "Could not update ports tree. Exiting now."
     exit 1
   fi
-  PORTS=`"$PKG" version -vl\<`
+  local PORTS=`"$PKG" version -vl\<`
   [ "$PORTS" == "" ] && return
   (
     echo "Hello,"
