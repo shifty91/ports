@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Time-stamp: <2016-03-28 20:21:35 kurt>
+# Time-stamp: <2016-08-17 18:11:09 kurt>
 #
 # Shell Script for updating the FreeBSD ports using portmaster.
 #
@@ -104,7 +104,7 @@ cron()
   elif [ -d ".svn" ] ; then
     [ -x "$SVN" ] && "$SVN" update >/dev/null
   elif [ -d ".git" ] ; then
-    [ -x "$GIT" ] && "$GIT" pull >/dev/null
+    [ -x "$GIT" ] && "$GIT" pull >/dev/null 2>&1
   else
     echo "Could not update ports tree. Exiting now."
     exit 1
